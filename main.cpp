@@ -299,7 +299,6 @@ int main(){
         blokuGrandine.push_back(naujasBlokas);
     }
     blokuGrandine[1].rodytbloka(); //skaiciu 1 ir 55 galima keisti norint perziureti kito bloko info
-    blokuGrandine[55].rodytbloka();
 
     string tranakcijosID = visostransakcijos[555].id; //skaiciu 1 galima keisti norint patikrinti kita transakcija
     transakcijosInfo(visostransakcijos, tranakcijosID);
