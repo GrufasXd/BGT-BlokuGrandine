@@ -261,6 +261,7 @@ int main(){
             nauja_transakcija.id = nauja_transakcija.generuotiID();
             transakcijos.push_back(nauja_transakcija);
             visostransakcijos.push_back(nauja_transakcija);
+            cout << "Transakcija " << i << " sukurta" << endl;
         }
     }
 
@@ -297,6 +298,7 @@ int main(){
             }
         transakcijos = naujasVec;
         blokuGrandine.push_back(naujasBlokas);
+        cout << "Blokas " << i << " sukurtas ir idetas i grandine" << endl;
     }
     blokuGrandine[1].rodytbloka(); //skaiciu 1 ir 55 galima keisti norint perziureti kito bloko info
 
