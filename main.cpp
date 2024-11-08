@@ -139,7 +139,7 @@ class blokas{
         turinys = tur;
         versija = vers;
         timestamp = gautiLaika();
-        difficulty_target = "00";
+        difficulty_target = "000";
         nonce = 0;
         merkle_root_hash = rastiMerkleRoot();
     };
@@ -228,11 +228,52 @@ void transakcijosInfo(const vector<transakcija>& visostransakcijos, const string
     cout << "Transakcija su ID - " << transakcijosId << " nerasta." << endl;
 };
 
+vector<blokas> generuotiKandidatus(const string& prevhash, const vector<transakcija>& visosTr, int version)
+{
+    vector<blokas> kandidatai;
+    for(int i = 0; i<5; i++)
+    {
+        vector<transakcija> blokuTr;
+
+        for(int j = 0; j < 100 && !visosTr.empty(); j++)
+        {
+            int randIndex = rand() % visosTr.size();
+            blokuTr.push_back(visosTr[randIndex]);
+        }
+
+        blokas kandidatas(prevhash, blokuTr, version);
+        kandidatai.push_back(kandidatas);
+    }
+    return kandidatai;
+}
+
+bool bandytKasti(blokas& block, int limitas)
+{
+    auto startT = chrono::steady_clock::now();
+
+    while(true){
+        string iskastasHash = block.kastiBloka();
+
+        if(iskastasHash.substr(0, block.difficulty_target.size()) == block.difficulty_target){
+            return true;
+        }
+
+        auto dabartinisT = chrono::steady_clock::now();
+        auto praejoT = chrono::duration_cast<chrono::seconds>(dabartinisT - startT).count();
+
+        if(praejoT > limitas)
+        break;
+    }
+    return false;
+}
+
 int main(){
     srand(time(0));
     vector<user> vartotojai;
     vector<transakcija> transakcijos;
     vector<transakcija> visostransakcijos;
+    stringstream ss;
+    string tikrinimas;
     for(int i = 0; i<1000; i++)
     {
         user naujasvartotojas;
@@ -240,28 +281,42 @@ int main(){
         vartotojai.push_back(naujasvartotojas);
     }
 
-    for(int i = 0; i<10000; i++)
+    while(transakcijos.size() < 10000)
     {
+        transakcija nauja_transakcija;
         int randomIndex1 = rand() % vartotojai.size();
         int randomIndex2 = rand() % vartotojai.size();
+
         while (randomIndex1 == randomIndex2) {
             randomIndex2 = rand() % vartotojai.size();
         }
 
-        int siuntejoIndeksas = (vartotojai[randomIndex1].balansas > vartotojai[randomIndex2].balansas) ? randomIndex1 : randomIndex2;
-        int gavejoindeksas = (siuntejoIndeksas == randomIndex1) ? randomIndex2 : randomIndex1;
+        int siuntejoIndeksas = randomIndex1;
+        int gavejoindeksas = randomIndex2;
+        nauja_transakcija.suma = 100 + (rand() % 1000001);
 
-        if(vartotojai[siuntejoIndeksas].balansas > 0)
+        if(vartotojai[siuntejoIndeksas].balansas >= nauja_transakcija.suma)
         {
-            transakcija nauja_transakcija;
             nauja_transakcija.siuntejoRaktas = vartotojai[siuntejoIndeksas].public_key;
             nauja_transakcija.gavejoRaktas = vartotojai[gavejoindeksas].public_key;
-            nauja_transakcija.suma = (rand() % static_cast<int> (vartotojai[siuntejoIndeksas].balansas)) + 1;
 
             nauja_transakcija.id = nauja_transakcija.generuotiID();
+            ss.str(""); 
+            ss.clear();
+            ss << nauja_transakcija.siuntejoRaktas << nauja_transakcija.gavejoRaktas << nauja_transakcija.suma;
+            tikrinimas = ss.str();
+            tikrinimas = hashfunction(tikrinimas);
+            if(nauja_transakcija.id == tikrinimas)
+            {
             transakcijos.push_back(nauja_transakcija);
             visostransakcijos.push_back(nauja_transakcija);
-            cout << "Transakcija " << i << " sukurta" << endl;
+            cout << "Transakcija " << transakcijos.size() << " sukurta ir patikrinta" << endl;
+            }
+            else
+            cout << "Transakcijos ID ir transakcijos informacijos maisos reiksme nesutampa" << endl;
+        }
+        else {
+            cout << "Transakcijos suma virsija siuntejo balansa " << endl;
         }
     }
 
