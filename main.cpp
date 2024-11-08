@@ -274,6 +274,7 @@ int main(){
     vector<transakcija> visostransakcijos;
     stringstream ss;
     string tikrinimas;
+    int limitas = 5;
     for(int i = 0; i<1000; i++)
     {
         user naujasvartotojas;
@@ -326,34 +327,40 @@ int main(){
     genesisBlock.kastiBloka();
     blokuGrandine.push_back(genesisBlock);
 
-    for(int i = 0; i<transakcijos.size(); i++)
-    {
-        vector<transakcija> blokuTransakcijos;
-        set<int> pridetiIn;
-
-        //renkam transakcijas
-        for (int j = 0; j < 100 && !transakcijos.empty(); j++) {
-            int randIndex = rand() % transakcijos.size();
-            blokuTransakcijos.push_back(transakcijos[randIndex]);
-            pridetiIn.insert(randIndex);
-        }
-
-        // naujo bloko hashas
+     while (!transakcijos.empty()) {
         string prevblockhash = blokuGrandine.back().kastiBloka();
-        // bloko kurimas
-        blokas naujasBlokas(prevblockhash, blokuTransakcijos, i+1);
-        naujasBlokas.kastiBloka();
-        naujasBlokas.atnaujintBalansa(vartotojai);
+        vector<blokas> kandidatai = generuotiKandidatus(prevblockhash, transakcijos, blokuGrandine.size() + 1);
 
-        vector<transakcija> naujasVec;
-        for (size_t j = 0; j < transakcijos.size(); j++) {
-            if (pridetiIn.find(j) == pridetiIn.end()) {
-                naujasVec.push_back(transakcijos[j]);
+        bool blokasIskastas = false;
+
+        for (int i = 0; i < kandidatai.size(); i++) {
+            cout << "Bandome kasti kandidato bloka " << i + 1 << endl;
+            
+            if (bandytKasti(kandidatai[i], limitas)) {
+                cout << "Blokas " << blokuGrandine.size() << " sekmingai iskastas!" << endl;
+
+                blokuGrandine.push_back(kandidatai[i]);
+                kandidatai[i].atnaujintBalansa(vartotojai);
+
+                //vektorius includintom tr
+                set<string> itrauktuTrId;
+                for (const auto& trans : kandidatai[i].turinys) {
+                    itrauktuTrId.insert(trans.id);
                 }
+
+                //vektorius likusiom tr
+                vector<transakcija> likusiTr;
+                for (const auto& trans : transakcijos) {
+                    if (itrauktuTrId.find(trans.id) == itrauktuTrId.end()) {
+                        likusiTr.push_back(trans);
+                    }
+                }
+                transakcijos = likusiTr;
+
+                blokasIskastas = true;
+                break;
             }
-        transakcijos = naujasVec;
-        blokuGrandine.push_back(naujasBlokas);
-        cout << "Blokas " << i << " sukurtas ir idetas i grandine" << endl;
+        }
     }
     blokuGrandine[1].rodytbloka(); //skaiciu 1 ir 55 galima keisti norint perziureti kito bloko info
 
