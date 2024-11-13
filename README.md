@@ -1,4 +1,4 @@
-Programos naudojimosi instrukcijos.
+**V0.1 Programos naudojimosi instrukcijos.**
 
 1. Atsisiųsti programą.
 2. Atsidaryti programą "main.cpp" per kodo redagavimo programą.
