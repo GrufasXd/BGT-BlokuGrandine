@@ -274,6 +274,28 @@ int main(){
     vector<transakcija> visostransakcijos;
     stringstream ss;
     string tikrinimas;
+    int pasirinkimas;
+    bool praeiti = false;
+    int blokoSk;
+    bool blokasTikras = false;
+    int transSk;
+    bool transakcijaTikra = false;
+    int toliau;
+    bool tol = false;
+    while (!praeiti) {
+        cout << "Ar spausdinti transakciju tikrinima ir bloku kurima? " << endl;
+        cout << "1 - Taip, 2 - Ne " << endl;
+        
+        cin >> pasirinkimas;
+
+        if (cin.fail() || (pasirinkimas != 1 && pasirinkimas != 2)) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "Neteisingas ivestis. Prasome ivesti 1 arba 2." << endl;
+        } else {
+            praeiti = true;
+        }
+    }
     int limitas = 5;
     for(int i = 0; i<1000; i++)
     {
@@ -311,12 +333,15 @@ int main(){
             {
             transakcijos.push_back(nauja_transakcija);
             visostransakcijos.push_back(nauja_transakcija);
+            if(pasirinkimas == 1)
             cout << "Transakcija " << transakcijos.size() << " sukurta ir patikrinta" << endl;
             }
             else
+            if(pasirinkimas == 1)
             cout << "Transakcijos ID ir transakcijos informacijos maisos reiksme nesutampa" << endl;
         }
         else {
+            if(pasirinkimas == 1)
             cout << "Transakcijos suma virsija siuntejo balansa " << endl;
         }
     }
@@ -334,9 +359,11 @@ int main(){
         bool blokasIskastas = false;
 
         for (int i = 0; i < kandidatai.size(); i++) {
+            if(pasirinkimas == 1)
             cout << "Bandome kasti kandidato bloka " << i + 1 << endl;
             
             if (bandytKasti(kandidatai[i], limitas)) {
+                if(pasirinkimas == 1)
                 cout << "Blokas " << blokuGrandine.size() << " sekmingai iskastas!" << endl;
 
                 blokuGrandine.push_back(kandidatai[i]);
@@ -362,10 +389,79 @@ int main(){
             }
         }
     }
-    blokuGrandine[1].rodytbloka(); //skaiciu 1 ir 55 galima keisti norint perziureti kito bloko info
+    cout << "Irasykite norimo perziureti bloko skaiciu" << endl;
+while (true) {
+    cin >> blokoSk;
 
-    string tranakcijosID = visostransakcijos[555].id; //skaiciu 1 galima keisti norint patikrinti kita transakcija
-    transakcijosInfo(visostransakcijos, tranakcijosID);
+    if (cin.fail() || blokoSk < 0 || blokoSk >= blokuGrandine.size()) {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << "Tokio bloko grandineje nera. Pasirinkite bloka nuo 0 iki " 
+             << blokuGrandine.size() - 1 << "." << endl;
+        continue;
+    }
+
+    blokuGrandine[blokoSk].rodytbloka();
+
+    //Klausiam ar vartotojas nori dar perziureti kitu bloku informacija
+    bool validAnswer = false;
+    while (!validAnswer) {
+        cout << "Ar norite ivesti dar viena bloka? " << endl;
+        cout << "1 - Taip, 2 - Ne" << endl;
+        cin >> toliau;
+
+        if (cin.fail() || (toliau != 1 && toliau != 2)) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "Neteisinga ivestis. Prasome ivesti 1 arba 2." << endl;
+        } else {
+            validAnswer = true;
+        }
+    }
+
+    if (toliau == 2) {
+        break;
+    }
+
+    cout << "Irasykite norimo perziureti bloko skaiciu" << endl;
+}
+
+cout << "Irasykite norimos perziureti transakcijos skaiciu" << endl;
+while (true) {
+    cin >> transSk;
+
+    if (cin.fail() || transSk < 0 || transSk >= visostransakcijos.size()) {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << "Tokios transakcijos nera. Pasirinkite transakcija nuo 0 iki " 
+             << visostransakcijos.size() - 1 << "." << endl;
+        continue;
+    }
+
+    string transakcijosID = visostransakcijos[transSk].id;
+    transakcijosInfo(visostransakcijos, transakcijosID);
+
+    //Klausiam ar vartotojas nori dar perziureti kitu transakciju informacija
+    bool validAnswer = false;
+    while (!validAnswer) {
+        cout << "Ar norite ivesti dar viena transakcija? " << endl;
+        cout << "1 - Taip, 2 - Ne" << endl;
+        cin >> toliau;
+
+        if (cin.fail() || (toliau != 1 && toliau != 2)) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "Neteisinga ivestis. Prasome ivesti 1 arba 2." << endl;
+        } else {
+            validAnswer = true;
+        }
+    }
+    if (toliau == 2) {
+        break;
+    }
+
+    cout << "Irasykite norimos perziureti transakcijos skaiciu" << endl;
+}
     
     return 0;
 }
